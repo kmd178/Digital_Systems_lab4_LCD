@@ -12,8 +12,8 @@ module sync_10bit_interface(
 	
 	parameter	DATA_INACTIVE				= 2'b00,
 					DATA_INITIALIZATION 		= 2'b01,
-					ENABLE_MODULATION_START	= 2'b10,
-					ENABLE_MODULATION_END	= 2'b11;
+					ENABLE_MODULATION_START	= 2'b10;
+				//	ENABLE_MODULATION_END	= 2'b11;
 					
 					
 	 //Display permanently accepts data in write mode. The LCD_RW signal can be tied Low permanently because the FPGA generally has no reason to read information from the display
@@ -62,22 +62,23 @@ module sync_10bit_interface(
 					
 						DATA_INACTIVE:
 							begin 
+									reset_counter<=0;
 									LCD_E<=0;
 									LCD_RS<=0;
 									MODULATED_DATA<= 0;
-									if(counter_1280ns & waitingtime==0 & NextState!=DATA_INITIALIZATION) 
+									if(count_clocks+1==63 & waitingtime==0 & NextState!=DATA_INITIALIZATION) 
 										begin
 											NextState<= DATA_INITIALIZATION;	
 											reset_counter<=1; 
 											//waitingtime=1;
 										end
-									else if(counter_40280ns & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
+									else if(count_clocks+1==2013 & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
 										begin 
 											NextState<= DATA_INITIALIZATION;
 											reset_counter<=1;
 											//waitingtime<=0;
 										end
-									else if(counter_15000000ns)
+									else if(count_clocks+1==749999)
 										begin
 											waitingtime<=0;
 											NextState<= DATA_INITIALIZATION;
@@ -86,14 +87,14 @@ module sync_10bit_interface(
 							end
 						DATA_INITIALIZATION:
 							begin
-									reset_counter<=0;
+									//reset_counter<=0;
 									LCD_E<=0;
 									LCD_RS<=UNMODULATED_DATA[9];
 
 									if (waitingtime==0 & NextState!=ENABLE_MODULATION_START)
 										begin
 											MODULATED_DATA=UNMODULATED_DATA[3:0];
-											if(counter_40ns)
+											if(count_clocks+1==1)
 												begin
 													waitingtime<= 1; 
 													NextState<= ENABLE_MODULATION_START;
@@ -101,7 +102,7 @@ module sync_10bit_interface(
 										end
 									else if (waitingtime==1 & NextState!=ENABLE_MODULATION_START) 
 										begin
-											if(counter_40ns)
+											if(count_clocks+1==1)
 												begin
 													waitingtime<= 0; 
 													NextState<= ENABLE_MODULATION_START;
@@ -119,16 +120,19 @@ module sync_10bit_interface(
 							begin
 									LCD_E<=1;
 									LCD_RS<=UNMODULATED_DATA[9];
-									if(counter_280ns) 
-										NextState<= ENABLE_MODULATION_END;
-							end	
-						ENABLE_MODULATION_END:
-							begin
-									LCD_E<=0;
-									LCD_RS<=UNMODULATED_DATA[9];
-									if(counter_300ns) 
+									if(count_clocks+1==13) 
 										NextState<= DATA_INACTIVE;
-							end
+									else if(NextState<= DATA_INACTIVE) 
+										LCD_E<=0;
+										LCD_RS<=UNMODULATED_DATA[9];
+							end	
+//						ENABLE_MODULATION_END:
+//							begin
+//									LCD_E<=1;
+//									LCD_RS<=UNMODULATED_DATA[9];
+//									 if(count_clocks+1==14) 
+//										NextState<= DATA_INACTIVE;
+//							end
 					endcase
 				end
 	end
@@ -143,80 +147,80 @@ module sync_10bit_interface(
 			else 
 				count_clocks<=count_clocks+1'b1;	
 				
-		always @(posedge clk)
-			case (count_clocks)
-			1:
-			begin
-				counter_40ns<=1;
-				counter_280ns<=0;
-				counter_300ns<=0;
-				counter_1280ns<=0;  
-				counter_40280ns<=0;
-				counter_15000000ns<=0;
-				end
-			14:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=1;
-				counter_300ns<=0;
-				counter_1280ns<=0;  
-				counter_40280ns<=0;
-				counter_15000000ns<=0;
-				end
-			15:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=0;
-				counter_300ns<=1;
-				counter_1280ns<=0;  
-				counter_40280ns<=0;
-				counter_15000000ns<=0;
-				end
-			16:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=0;
-				counter_300ns<=1;
-				counter_1280ns<=0;  
-				counter_40280ns<=0;
-				counter_15000000ns<=0;
-				end
-			64:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=0;
-				counter_300ns<=0;
-				counter_1280ns<=1;  
-				counter_40280ns<=0;
-				counter_15000000ns<=0;	
-				end				
-			2014:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=0;
-				counter_300ns<=0;
-				counter_1280ns<=0;  
-				counter_40280ns<=1;
-				counter_15000000ns<=0;
-				end
-			750000:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=0;
-				counter_300ns<=0;
-				counter_1280ns<=0;  
-				counter_40280ns<=0;
-				counter_15000000ns<=1;
-				end
-			default:
-			begin
-				counter_40ns<=0;
-				counter_280ns<=0;
-				counter_300ns<=0;
-				counter_1280ns<=0;  
-				counter_40280ns<=0;
-				counter_15000000ns<=0;
-				end
-			endcase
+//		always @(posedge clk)
+//			case (count_clocks)
+//			1:
+//			begin
+//				counter_40ns<=1;
+//				counter_280ns<=0;
+//				counter_300ns<=0;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=0;
+//				end
+//			14:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=1;
+//				counter_300ns<=0;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=0;
+//				end
+//			15:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=0;
+//				counter_300ns<=1;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=0;
+//				end
+//			16:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=0;
+//				counter_300ns<=1;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=0;
+//				end
+//			64:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=0;
+//				counter_300ns<=0;
+//				counter_1280ns<=1;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=0;	
+//				end				
+//			2014:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=0;
+//				counter_300ns<=0;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=1;
+//				counter_15000000ns<=0;
+//				end
+//			750000:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=0;
+//				counter_300ns<=0;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=1;
+//				end
+//			default:
+//			begin
+//				counter_40ns<=0;
+//				counter_280ns<=0;
+//				counter_300ns<=0;
+//				counter_1280ns<=0;  
+//				counter_40280ns<=0;
+//				counter_15000000ns<=0;
+//				end
+//			endcase
 			
 endmodule

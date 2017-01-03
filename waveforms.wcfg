@@ -15,6 +15,9 @@
       <marker time="25054690000000" label="" />
       <marker time="15000530000000" label="" />
       <marker time="15000270000000" label="" />
+      <marker time="44355090000000" label="" />
+      <marker time="197539930000000" label="" />
+      <marker time="39685750000000" label="" />
    </wave_markers>
    <wvobject fp_name="/tb/SF_D_8" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">SF_D_8</obj_property>
