@@ -2,17 +2,11 @@
 
 module tb;
 
-reg reset,clk,BTN2;
-wire VGA_RED,VGA_GREEN,VGA_BLUE,VGA_HSYNC,VGA_VSYNC;
+reg reset,clk;
 
-vga_controller sys0(
+lcd_controller sys0(
 	.reset(reset),
-	.clk(clk),
-	.VGA_RED(VGA_RED),
-	.VGA_GREEN(VGA_GREEN),
-	.VGA_BLUE(VGA_BLUE),
-	.VGA_HSYNC(VGA_HSYNC),
-	.VGA_VSYNC(VGA_VSYNC)
+	.clk(clk)
 );
 
 
