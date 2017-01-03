@@ -14,17 +14,17 @@ module lcd_controller(
 		output LCD_RW //Read/Write Control      0: WRITE, LCD accepts data
 						//									 1: READ, LCD presents data
     );
-	 
+					//first command
 	 reg [9:0] command_10bit=10'b0000000000; //LCDRS, LCDRW , DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
-	 assign {SF_D_8,SF_D_9,SF_D_10,SF_D_11}=bus_4bits;
+	 //assign {SF_D_8,SF_D_9,SF_D_10,SF_D_11}=bus_4bits;
 	 reg [5:0] command_counter=0;
 	 
-	 sync_10bit_interface kmd(clk, reset, command_10bit ,bus_4bits, LCD_RS, LCD_RW, LCD_E, next_command_signal);
+	 sync_10bit_interface kmd(clk, reset, command_10bit ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
 	 
-	 always @(next_command_signal)
+	 always @(posedge next_command_signal)
 		begin
 			case (command_counter)
-				0: command_10bit=10'b0000000000; //never accesed
+				0: command_10bit=10'b1111111111;  //first executed command
 				1:	command_10bit=10'b0000000001;
 				2: command_10bit=10'b0000000010;
 				3: command_10bit=10'b0000000100;
