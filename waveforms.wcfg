@@ -10,14 +10,9 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="24" />
+   <WVObjectSize size="19" />
    <wave_markers>
-      <marker time="25054690000000" label="" />
-      <marker time="15000530000000" label="" />
-      <marker time="15000270000000" label="" />
-      <marker time="44355090000000" label="" />
-      <marker time="197539930000000" label="" />
-      <marker time="39685750000000" label="" />
+      <marker time="0" label="" />
    </wave_markers>
    <wvobject fp_name="/tb/SF_D_8" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">SF_D_8</obj_property>
@@ -91,29 +86,9 @@
       <obj_property name="ElementShortName">next_command_signal</obj_property>
       <obj_property name="ObjectShortName">next_command_signal</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb/sys0/kmd/counter_40ns" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">counter_40ns</obj_property>
-      <obj_property name="ObjectShortName">counter_40ns</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/sys0/kmd/counter_280ns" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">counter_280ns</obj_property>
-      <obj_property name="ObjectShortName">counter_280ns</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/sys0/kmd/counter_300ns" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">counter_300ns</obj_property>
-      <obj_property name="ObjectShortName">counter_300ns</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/sys0/kmd/counter_1280ns" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">counter_1280ns</obj_property>
-      <obj_property name="ObjectShortName">counter_1280ns</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/sys0/kmd/counter_40280ns" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">counter_40280ns</obj_property>
-      <obj_property name="ObjectShortName">counter_40280ns</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/sys0/kmd/counter_15000000ns" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">counter_15000000ns</obj_property>
-      <obj_property name="ObjectShortName">counter_15000000ns</obj_property>
+   <wvobject fp_name="/tb/sys0/kmd/next_command" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">next_command</obj_property>
+      <obj_property name="ObjectShortName">next_command</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/sys0/kmd/reset_counter" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">reset_counter</obj_property>
