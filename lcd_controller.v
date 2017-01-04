@@ -14,7 +14,7 @@ module lcd_controller(
 		output LCD_RW //Read/Write Control      0: WRITE, LCD accepts data
 						//									 1: READ, LCD presents data
     );
-					//first command
+					//first executed command
 	 reg [9:0] command_10bit=10'b1111111111; //LCDRS, LCDRW , DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
 	 //assign {SF_D_8,SF_D_9,SF_D_10,SF_D_11}=bus_4bits;
 	 reg [5:0] command_counter=0;
@@ -24,7 +24,7 @@ module lcd_controller(
 	 always @(posedge next_command_signal)
 		begin
 			case (command_counter)
-				0: command_10bit=10'b1110000111;  //first executed command
+				0: command_10bit=10'b1110000111;  //second executed command
 				1:	command_10bit=10'b0000000001;
 				2: command_10bit=10'b0000000010;
 				3: command_10bit=10'b0000000100;
@@ -46,13 +46,13 @@ endmodule
 //	four-bit data interface to the LCD as follows:
 //		WAIT 750.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER
 //	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT 205.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER
+//		WAIT 205.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  955.000
 //	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT   5.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER
+//		WAIT   5.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  960.000
 //	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT   2.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER	 
+//		WAIT   2.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  962.000
 //	//	DATA=0x02 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT   2.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER	
+//		WAIT   2.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  964.000
 //	 
 //Function Set
 //	Sets interface data length, number of display lines, and character font. 

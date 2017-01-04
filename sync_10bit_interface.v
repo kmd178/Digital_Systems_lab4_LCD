@@ -89,12 +89,33 @@ module sync_10bit_interface(
 														reset_counter<=1;
 														waitingtime<=1;
 													end
-												else if(clock_counter+1==749999)
+												else if(clock_counter+1>=750000 & clock_counter+1<=750000+12 & waitingtime==2)
+													begin 
+														LCD_E<=1;
+														MODULATED_DATA<=3;
+													end
+												else if(clock_counter+1>=955012 & clock_counter+1<=955012+12 & waitingtime==2)
+													begin 
+														LCD_E<=1;
+														MODULATED_DATA<=3;
+													end												
+												else if(clock_counter+1>=960024 & clock_counter+1<=960024+12 & waitingtime==2)
+													begin 
+														LCD_E<=1;
+														MODULATED_DATA<=3;
+													end												
+												else if(clock_counter+1>=962036 & clock_counter+1<=962036+12 & waitingtime==2)
+													begin 
+														LCD_E<=1;
+														MODULATED_DATA<=2;
+													end																					
+												else if(clock_counter+1==964048)
 													begin
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1; 
 														waitingtime<=1;
 													end
+												
 										end
 									DATA_INITIALIZATION:
 										begin
