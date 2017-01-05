@@ -10,9 +10,11 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="18" />
+   <WVObjectSize size="22" />
    <wave_markers>
       <marker time="0" label="" />
+      <marker time="19320990521000" label="" />
+      <marker time="19497490521000" label="" />
    </wave_markers>
    <wvobject fp_name="/tb/SF_D_8" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">SF_D_8</obj_property>
@@ -50,17 +52,36 @@
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb/sys0/bram/EN" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">EN</obj_property>
+      <obj_property name="ObjectShortName">EN</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/sys0/bram/DO" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">DO[7:0]</obj_property>
+      <obj_property name="ObjectShortName">DO[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/sys0/bram/ADDR" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ADDR[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ADDR[10:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/sys0/command_11bit" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">command_11bit[10:0]</obj_property>
+      <obj_property name="ObjectShortName">command_11bit[10:0]</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb/sys0/command_counter" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">command_counter[5:0]</obj_property>
       <obj_property name="ObjectShortName">command_counter[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/sys0/kmd/UNMODULATED_DATA" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">UNMODULATED_DATA[9:0]</obj_property>
-      <obj_property name="ObjectShortName">UNMODULATED_DATA[9:0]</obj_property>
+      <obj_property name="ElementShortName">UNMODULATED_DATA[10:0]</obj_property>
+      <obj_property name="ObjectShortName">UNMODULATED_DATA[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/sys0/kmd/MODULATED_DATA" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">MODULATED_DATA[3:0]</obj_property>
       <obj_property name="ObjectShortName">MODULATED_DATA[3:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/sys0/kmd/CurrentState" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">CurrentState[1:0]</obj_property>

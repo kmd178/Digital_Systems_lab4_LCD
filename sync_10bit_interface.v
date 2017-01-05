@@ -2,12 +2,12 @@
 module sync_10bit_interface(
 		input clk,
 		input reset,
-		input [9:0] UNMODULATED_DATA,
+		input [10:0] UNMODULATED_DATA,
 		output reg [3:0] MODULATED_DATA,
 		output reg LCD_RS,  
 		output reg LCD_RW,
 		output reg LCD_E,
-		output reg next_command=0
+		output reg next_command
 		);
 	
 	parameter	DATA_INACTIVE				= 2'b00,
@@ -20,7 +20,6 @@ module sync_10bit_interface(
 	 //Display permanently accepts data in write mode. The LCD_RW signal can be tied Low permanently because the FPGA generally has no reason to read information from the display
 	reg [1:0] CurrentState;
 	reg [1:0] NextState;
-
 	//40ns=0;   		//2clk			//DATA_INITIALIZATION
 	//280ns=0;  		//14clk			//ENABLE_MODULATION_START
 	//300ns=0;  		//15clk			//ENABLE_MODULATION_END
@@ -70,14 +69,17 @@ module sync_10bit_interface(
 								case (CurrentState)
 									DATA_INACTIVE:
 										begin 
-												next_command<=0;
-												LCD_E<=0;
-												LCD_RS<=0;
-												MODULATED_DATA<= 0;
-												reset_counter<=0;
-												if(clock_counter+1==63 & waitingtime==0 & NextState!=DATA_INITIALIZATION) 
-													begin
 
+												if(UNMODULATED_DATA[10]==0 & waitingtime!=3 & NextState!=DATA_INITIALIZATION)
+														waitingtime=3;
+												else if(clock_counter+1==82000 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
+													begin
+														NextState<= DATA_INITIALIZATION;
+														reset_counter<=1; 
+														waitingtime<=1;
+													end	
+												else if(clock_counter+1==63 & waitingtime==0 & NextState!=DATA_INITIALIZATION) 
+													begin
 														NextState<= DATA_INITIALIZATION;	
 														reset_counter<=1; 
 														waitingtime<=0;
@@ -109,13 +111,21 @@ module sync_10bit_interface(
 														LCD_E<=1;
 														MODULATED_DATA<=2;
 													end																					
-												else if(clock_counter+1==964048)
+												else if(clock_counter+1==964048 & waitingtime==2)
 													begin
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1; 
 														waitingtime<=1;
 													end
-												
+												else
+													begin
+														next_command<=0;
+														LCD_E<=0;
+														LCD_RS<=0;
+														MODULATED_DATA<= 0;
+														reset_counter<=0;
+													end
+
 										end
 									DATA_INITIALIZATION:
 										begin

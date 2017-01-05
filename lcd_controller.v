@@ -15,31 +15,33 @@ module lcd_controller(
 						//									 1: READ, LCD presents data
     );
 					//first executed command
-	 reg [9:0] command_10bit=10'b1111111111; //LCDRS, LCDRW , DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
-	 //assign {SF_D_8,SF_D_9,SF_D_10,SF_D_11}=bus_4bits;
+	 reg [10:0] command_11bit=11'b00000000000; //LCD_E, LCDRS, LCDRW , DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
 	 reg [5:0] command_counter=0;
 	 
-	 sync_10bit_interface kmd(clk, reset, command_10bit ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
+	 sync_10bit_interface kmd(clk, reset, command_11bit ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
 	 
-	 always @(posedge next_command_signal)
-		begin
-			case (command_counter)
-				0: command_10bit=10'b1110000111;  //second executed command
-				1:	command_10bit=10'b0000000001;
-				2: command_10bit=10'b0000000010;
-				3: command_10bit=10'b0000000100;
-				4: command_10bit=10'b0000001000;
-				5: command_10bit=10'b0000010000;
-				6: command_10bit=10'b0000100000;
-				7: command_10bit=10'b0001000000;
-				8: command_10bit=10'b0010000000;
-				9: command_10bit=10'b0100000000;
-				10:command_10bit=10'b1000000000;
-				//////// repeating the display commands only. Commands 0-5 are used for initialization of the display that only needs to be accessed upon reactivation of the device
-				11: command_counter=1;
-			endcase
-			command_counter=command_counter+1;
-		end
+	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 ,command_11bit[7:0]); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
+																					//----- out of the 16383 bits provided by a  the 2Kx8bit preconfigured BRAM blocks
+																					
+	 always @(posedge next_command_signal, posedge reset)
+		if (reset) 
+			begin
+				command_counter<=0;
+				command_11bit[10]<=1;
+			end
+		else
+				case (command_counter)
+					4: begin
+						command_11bit[10]<=0;   //large waiting time ->  1.64ms
+						command_counter<=command_counter+1;
+						end
+					66:command_counter<=5;  //last command
+					//////// repeating the display commands only. Commands 1-4 are used for initialization of the display that only needs to be accessed upon reactivation of the device
+					default: begin 
+								command_counter<=command_counter+1;
+								command_11bit[10]<=1;
+								end
+				endcase
 endmodule 
 //Power-On Initialization
 //	The initialization sequence first establishes that the FPGA application wishes to use the 
@@ -98,4 +100,3 @@ endmodule
 //		addresses. The address counter is reset to 0, location 0x00 in DD RAM. Clears all option 
 //		settings. The I/D control bit is set to 1 (increment address counter mode) in the Entry Mode Set command.
 //		Execution Time: 82µs - 1.64 ms = 82.000 cycles  //0000000001  //0x01..  and wait 82.000cycles
-			
