@@ -15,34 +15,105 @@ module lcd_controller(
 						//									 1: READ, LCD presents data
     );
 					//first executed command
-	 reg [10:0] command_11bit=11'b00000000000; //LCD_E, LCDRS, LCDRW , DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
+	
+	 reg LCD_E_on=1;				  //LCD_E
+	 reg LCD_RS_on=1;				  //LCD_RS
+	 //reg LCD_RW_on=0;			  //Not necessary. Only write mode is used. LCD_RW=0;
+	 wire [7:0] BRAM_OUTPUT; // DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
+	
+	
 	 reg [5:0] command_counter=0;
-	 
-	 sync_10bit_interface kmd(clk, reset, command_11bit ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
-	 
-	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 ,command_11bit[7:0]); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
+	 reg [1:0] refresh_counter=0;
+	
+	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_OUTPUT} ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
+	  
+	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
 																					//----- out of the 16383 bits provided by a  the 2Kx8bit preconfigured BRAM blocks
-																					
+	 
 	 always @(posedge next_command_signal, posedge reset)
 		if (reset) 
-			begin
+			begin 
 				command_counter<=0;
-				command_11bit[10]<=1;
+				LCD_E_on<=1;
+				LCD_RS_on<=0;
+				refresh_counter<=0;
 			end
-		else
-				case (command_counter)
-					4: begin
-						command_11bit[10]<=0;   //large waiting time ->  1.64ms
-						command_counter<=command_counter+1;
-						end
-					66:command_counter<=5;  //last command
-					//////// repeating the display commands only. Commands 1-4 are used for initialization of the display that only needs to be accessed upon reactivation of the device
-					default: begin 
-								command_counter<=command_counter+1;
-								command_11bit[10]<=1;
-								end
-				endcase
+		else	
+				begin
+					case (command_counter)
+						4: begin  //Clear Display function
+							LCD_E_on<=0;   //large waiting time ->  1.64ms. sync_10bit_interface module is designed to implement the waiting time of the Clear Display function in its FSM
+							end
+						6: LCD_RS_on<=1;
+						7: LCD_RS_on<=0;
+						8: LCD_RS_on<=1;
+						13: LCD_RS_on<=0;
+						14: LCD_RS_on<=1;
+						15: LCD_RS_on<=0;
+						16: LCD_RS_on<=1;
+						21: LCD_RS_on<=0;
+						22: LCD_RS_on<=1;
+						39: LCD_RS_on<=0;
+						40: LCD_RS_on<=1;
+						55: command_counter<=command_counter+refresh_counter;
+						56: command_counter<=59;
+						57: command_counter<=59;
+						58: command_counter<=59;
+						//59: command_counter<=59;
+						60: begin 
+								command_counter<=5;  //last command
+								refresh_counter<=refresh_counter+1;
+								LCD_RS_on<=1; //invalid instruction input on sync_10bit_interface signals the 1second interval of the LED's refresh
+								LCD_E_on<=0;
+							end
+						//////// repeating the display commands only. Commands 1-4 are used for initialization of the display that only needs to be accessed upon reactivation of the device
+						default:  LCD_E_on<=1;
+														
+					endcase
+
+					command_counter<=command_counter+1;
+				end
 endmodule 
+
+//0:Function Set    		0000101000 		0x28
+//1:Entry Mode Set  		0000000110 		0x06
+//2:Display On/Off  		0000001100 		0x0C
+//3:Clear Display   		0000000001 		0x01
+//4: -Blank-        		0000000000 		0x00		Wait 1,64ms 
+
+//5: CGRAM SET  ADRESS  0001 000 001  	0x41	{rs,rw,7,6,5,4,3,2,1,0} //Implemented on the hypothesys that every WRITE CHAR will iterate CGRAM Memory address by 1 (meaning next row on the 5x8bitmap)    
+//6: INSERT " ^ " 	   1000011111		0x1F
+
+//7: CGRAM SET  ADRESS  0001 001 001  0x49    
+//8: INSERT  "  |"  		1000010000		0x10
+//9: INSERT  "  |"  		1000010000		0x10
+//10: INSERT "  |"  		1000010000		0x10
+//11: INSERT "  |"  		1000010000		0x10
+//12: INSERT "  |"  		1000010000		0x10
+
+//13: CGRAM SET  ADRESS 0001 010 110  0x56     
+//14: INSERT " _ " 		1000011111		0x1F
+
+//15: CGRAM SET  ADRESS 0001 011 001  0x59
+//16: INSERT "|  "  		1000000001		0x01
+//17: INSERT "|  "  		1000000001		0x01
+//18: INSERT "|  "  		1000000001		0x01
+//19: INSERT "|  "  		1000000001		0x01
+//20: INSERT "|  "  		1000000001		0x01
+
+//21: DDRAM SET  ADRESS 001 0000000 {rs,rw,7,6,5,4,3,2,1,0} rs=0 0x80
+//...
+//22-38: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)   	rs=1 0x41 until 0x50
+//...
+//39: DDRAM SET  ADRESS 001 011111 {rs,rw,7,6,5,4,3,2,1,0}  rs=0 0xC0
+//...
+//40-55: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
+//...
+//56: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
+//57: -Blank-     00000000  Wait 1 second and repeat from 10th command
+
+
+
 //Power-On Initialization
 //	The initialization sequence first establishes that the FPGA application wishes to use the 
 //	four-bit data interface to the LCD as follows:
@@ -99,4 +170,6 @@ endmodule
 //		This command writes a blank space (ASCII/ANSI character code 0x20) into all DD RAM 
 //		addresses. The address counter is reset to 0, location 0x00 in DD RAM. Clears all option 
 //		settings. The I/D control bit is set to 1 (increment address counter mode) in the Entry Mode Set command.
-//		Execution Time: 82µs - 1.64 ms = 82.000 cycles  //0000000001  //0x01..  and wait 82.000cycles
+//		Execution Time: 82µs - 1.64 ms = 82.000 cycles  //0000000001  //0x01..  and wait 82.000cycles\
+//
+
