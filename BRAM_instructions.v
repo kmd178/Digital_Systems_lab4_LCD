@@ -5,7 +5,42 @@ module BRAM_instructions(
 	input [10:0] ADDR,
 	input EN,
 	output [7:0] DO);
-	
+//0:Function Set    		0000101000 		0x28
+//1:Entry Mode Set  		0000000110 		0x06
+//2:Display On/Off  		0000001100 		0x0C
+//3:Clear Display   		0000000001 		0x01
+//4: -Blank-        		0000000000 		0x00		Wait 1,64ms 
+
+//5: CGRAM SET  ADRESS  0001 000 001  	0x41	{rs,rw,7,6,5,4,3,2,1,0} //Implemented on the hypothesys that every WRITE CHAR will iterate CGRAM Memory address by 1 (meaning next row on the 5x8bitmap)    
+//6: INSERT " ^ " 	   1000011111		0x1F
+
+//7: CGRAM SET  ADRESS  0001 001 001  0x49    
+//8: INSERT  "  |"  		1000010000		0x10
+//9: INSERT  "  |"  		1000010000		0x10
+//10: INSERT "  |"  		1000010000		0x10
+//11: INSERT "  |"  		1000010000		0x10
+//12: INSERT "  |"  		1000010000		0x10
+
+//13: CGRAM SET  ADRESS 0001 010 110  0x56     
+//14: INSERT " _ " 		1000011111		0x1F
+
+//15: CGRAM SET  ADRESS 0001 011 001  0x59
+//16: INSERT "|  "  		1000000001		0x01
+//17: INSERT "|  "  		1000000001		0x01
+//18: INSERT "|  "  		1000000001		0x01
+//19: INSERT "|  "  		1000000001		0x01
+//20: INSERT "|  "  		1000000001		0x01
+
+//21: DDRAM SET  ADRESS 001 0000000 {rs,rw,7,6,5,4,3,2,1,0} rs=0 0x80
+//...
+//22-38: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)   	rs=1 0x41 until 0x50
+//...
+//39: DDRAM SET  ADRESS 001 011111 {rs,rw,7,6,5,4,3,2,1,0}  rs=0 0xC0
+//...
+//40-55: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
+//...
+//56-59: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
+//60: -Blank-     00000000  Wait 1 second and repeat from 10th command
    RAMB16_S9 #(
       .INIT(9'h000),  // Value of output RAM registers at startup
       .SRVAL(9'h000), // Output value upon SSR assertion
@@ -13,8 +48,8 @@ module BRAM_instructions(
 
       // The forllowing INIT_xx declarations specify the initial contents of the RAM
       // Address 0 to 511
-      .INIT_00(256'h00_00_28_06_0C_01_00_15_15_15_15_15_15_15_15_15_15_15_15_15_15_15_15_14_13_12_11_00_01_0C_06_28),
-      .INIT_01(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
+      .INIT_00(256'h4A_49_48_47_46_45_44_43_42_41_80_01_01_01_01_01_59_1F_56_10_10_10_10_10_49_1F_41_00_01_0C_06_28),
+      .INIT_01(256'hFF_FF_FF_FF_FF_00_03_02_01_00_6F_6E_6D_6C_6B_6A_69_68_67_66_65_64_63_62_61_C0_50_4F_4E_4D_4C_4B),
       .INIT_02(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
       .INIT_03(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
       .INIT_04(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),

@@ -10,7 +10,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="21" />
+   <WVObjectSize size="22" />
    <wave_markers>
       <marker time="0" label="" />
       <marker time="19497490521000" label="" />
@@ -55,6 +55,10 @@
    <wvobject fp_name="/tb/sys0/bram/EN" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">EN</obj_property>
       <obj_property name="ObjectShortName">EN</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/sys0/LCD_E_on" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">LCD_E_on</obj_property>
+      <obj_property name="ObjectShortName">LCD_E_on</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/sys0/bram/DO" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">DO[7:0]</obj_property>

@@ -26,7 +26,7 @@ module sync_10bit_interface(
 	//1280ns=0;  		//64clk		 	//DATA_INACTIVE       (transmision of the next 4bits)
 	//40280ns=0;		//2014clk 		//DATA_INACTIVE       (transmision of the next command)
 	//15000000ns=0;	//750000clk 	//DATA_INACTIVE       (transmision of the next command)
-	reg [20:0] 	clock_counter=0;
+	reg [25:0] 	clock_counter=0;
 	reg reset_counter;
 	reg [1:0] waitingtime=2;	//0:Waiting time=1us  		(transmision of the next 4bits)
 										//1:Waiting time=40us 		(transmision of the next command)
@@ -69,9 +69,16 @@ module sync_10bit_interface(
 								case (CurrentState)
 									DATA_INACTIVE:
 										begin 
-												if(UNMODULATED_DATA[10]==0 & waitingtime!=3 & NextState!=DATA_INITIALIZATION)
+												if(UNMODULATED_DATA[10]==0  & waitingtime!=3 & NextState!=DATA_INITIALIZATION)
 														waitingtime=3;
-												else if(clock_counter+1==82000 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
+												else if(clock_counter+1==82000 & UNMODULATED_DATA[9]==0 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
+													begin
+														NextState<= DATA_INITIALIZATION;
+														reset_counter<=1; 
+														waitingtime<=1;
+														next_command<=1;
+													end	
+												else if(clock_counter+1==50000000 & UNMODULATED_DATA[9]==1 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
 													begin
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1; 
@@ -84,13 +91,18 @@ module sync_10bit_interface(
 														reset_counter<=1; 
 														waitingtime<=0;
 													end
-												else if(clock_counter+1==2013 & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
+												else if(clock_counter+1==2012 & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
 													begin 
 														next_command<=1;
+													end	
+												else if(clock_counter+1==2013 & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
+													begin 
+														next_command<=0;
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1;
 														waitingtime<=1;
 													end
+
 												else if(clock_counter+1>=750000 & clock_counter+1<=750000+12 & waitingtime==2)
 													begin 
 														LCD_E<=1;

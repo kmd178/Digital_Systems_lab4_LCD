@@ -4,7 +4,7 @@ module lcd_controller(
 		input reset,
 		output SF_D_8, //Although the LCD supports an 8-bit data interface, the Starter Kit board uses a 
 		output SF_D_9,	//4-bit data interface to remain compatible with other Xilinx development boards and to minimize total pin count.
-		output SF_D_10,	
+		output SF_D_10,
 		output SF_D_11,
 			
 		output LCD_E, //Read&Write Enable Pulse 0: Disabled  
@@ -29,52 +29,62 @@ module lcd_controller(
 	  
 	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
 																					//----- out of the 16383 bits provided by a  the 2Kx8bit preconfigured BRAM blocks
-	 
+	 	 
+		 reg counter_jump;
 	 always @(posedge next_command_signal, posedge reset)
-		if (reset) 
-			begin 
-				command_counter<=0;
-				LCD_E_on<=1;
-				LCD_RS_on<=0;
-				refresh_counter<=0;
+		if (reset)
+			command_counter=0;
+		else if(command_counter==53)
+			command_counter=command_counter+1+refresh_counter;
+		else if(command_counter==54 | command_counter==55 | command_counter==56)
+			command_counter=58;
+		else if(command_counter==58)
+			command_counter=21; //last command-1
+		else
+			command_counter=command_counter+1;
+			
+
+	 always @(posedge next_command_signal, posedge reset)
+		if (reset)
+			begin  
+			   refresh_counter=0;	
+				LCD_E_on=1;			
+				LCD_RS_on=0;			
+					
 			end
 		else	
 				begin
 					case (command_counter)
 						4: begin  //Clear Display function
-							LCD_E_on<=0;   //large waiting time ->  1.64ms. sync_10bit_interface module is designed to implement the waiting time of the Clear Display function in its FSM
+							LCD_E_on=0;   //large waiting time ->  1.64ms. sync_10bit_interface module is designed to implement the waiting time of the Clear Display function in its FSM
 							end
-						6: LCD_RS_on<=1;
-						7: LCD_RS_on<=0;
-						8: LCD_RS_on<=1;
-						13: LCD_RS_on<=0;
-						14: LCD_RS_on<=1;
-						15: LCD_RS_on<=0;
-						16: LCD_RS_on<=1;
-						21: LCD_RS_on<=0;
-						22: LCD_RS_on<=1;
-						39: LCD_RS_on<=0;
-						40: LCD_RS_on<=1;
-						55: command_counter<=command_counter+refresh_counter;
-						56: command_counter<=59;
-						57: command_counter<=59;
-						58: command_counter<=59;
-						//59: command_counter<=59;
-						60: begin 
-								command_counter<=5;  //last command
-								refresh_counter<=refresh_counter+1;
-								LCD_RS_on<=1; //invalid instruction input on sync_10bit_interface signals the 1second interval of the LED's refresh
-								LCD_E_on<=0;
+						6: LCD_RS_on=1;
+						7: LCD_RS_on=0;
+						8: LCD_RS_on=1;
+						13: LCD_RS_on=0;
+						14: LCD_RS_on=1;
+						15: LCD_RS_on=0;
+						16: LCD_RS_on=1;
+						21: begin
+								LCD_RS_on=0;
+								LCD_E_on=1;
+							 end
+						22: LCD_RS_on=1;
+						38: LCD_RS_on=0;
+						39: LCD_RS_on=1;
+						58: begin 
+								refresh_counter=refresh_counter+1;
+								LCD_RS_on=1; //invalid instruction input to sync_10bit_interface {signals the 1second interval of the LED's refresh}
+								LCD_E_on=0;  //invalid instruction input to sync_10bit_interface {signals the 1second interval of the LED's refresh}
 							end
 						//////// repeating the display commands only. Commands 1-4 are used for initialization of the display that only needs to be accessed upon reactivation of the device
-						default:  LCD_E_on<=1;
+						default:  LCD_E_on=1;
 														
 					endcase
 
-					command_counter<=command_counter+1;
+					  ///IT IS NOT ACCESED IF ITS ASSIGNED INSIDE THE CASE STATEMENT
 				end
 endmodule 
-
 //0:Function Set    		0000101000 		0x28
 //1:Entry Mode Set  		0000000110 		0x06
 //2:Display On/Off  		0000001100 		0x0C
@@ -103,14 +113,14 @@ endmodule
 
 //21: DDRAM SET  ADRESS 001 0000000 {rs,rw,7,6,5,4,3,2,1,0} rs=0 0x80
 //...
-//22-38: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)   	rs=1 0x41 until 0x50
+//22-37: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)   	rs=1 0x41 until 0x50
 //...
-//39: DDRAM SET  ADRESS 001 011111 {rs,rw,7,6,5,4,3,2,1,0}  rs=0 0xC0
+//38: DDRAM SET  ADRESS 001 011111 {rs,rw,7,6,5,4,3,2,1,0}  rs=0 0xC0
 //...
-//40-55: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
+//39-53: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
 //...
-//56: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
-//57: -Blank-     00000000  Wait 1 second and repeat from 10th command
+//54-57: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
+//58: -Blank-     00000000  Wait 1 second and repeat from 10th command
 
 
 
