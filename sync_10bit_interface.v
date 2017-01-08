@@ -70,7 +70,7 @@ module sync_10bit_interface(
 									DATA_INACTIVE:
 										begin 
 												if(UNMODULATED_DATA[10]==0  & waitingtime!=3 & NextState!=DATA_INITIALIZATION)
-														waitingtime=3;
+														waitingtime<=3;
 												else if(clock_counter+1==82000 & UNMODULATED_DATA[9]==0 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
 													begin
 														NextState<= DATA_INITIALIZATION;

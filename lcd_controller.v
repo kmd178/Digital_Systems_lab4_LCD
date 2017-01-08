@@ -30,7 +30,7 @@ module lcd_controller(
 	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
 																					//----- out of the 16383 bits provided by a  the 2Kx8bit preconfigured BRAM blocks
 	 	 
-		 reg counter_jump;
+
 	 always @(posedge next_command_signal, posedge reset)
 		if (reset)
 			command_counter=0;
