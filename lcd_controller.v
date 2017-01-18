@@ -15,22 +15,14 @@ module lcd_controller(
 						//									 1: READ, LCD presents data
     );
 					//first executed command
-	
-	 reg LCD_E_on=1;				  //LCD_E
-	 reg LCD_RS_on=1;				  //LCD_RS
-	 //reg LCD_RW_on=0;			  //Not necessary. Only write mode is used. LCD_RW=0;
-	 wire [7:0] BRAM_OUTPUT; // DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0
-	
-	
+	 
+	 
+	 
+	 	
 	 reg [5:0] command_counter=0;
-	 reg [1:0] refresh_counter=0;
-	
-	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_OUTPUT} ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
-	  
-	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
-																					//----- out of the 16383 bits provided by a  the 2Kx8bit preconfigured BRAM blocks
-	 	 
-
+	 reg [1:0] refresh_counter=0;	  //For the implementation of the rotating cursor.Every refresh interval in the subdivision of 4 has a different 
+											//output signal transmitted to the 32nd character position of the LCD display. 
+	 
 	 always @(posedge next_command_signal, posedge reset)
 		if (reset)
 			command_counter=0;
@@ -42,7 +34,19 @@ module lcd_controller(
 			command_counter=21; //last command-1
 		else
 			command_counter=command_counter+1;
-			
+	 
+	 
+	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
+	 wire [7:0] BRAM_OUTPUT; // DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0	 
+
+
+	 reg LCD_E_on=1;				  //Configures the state that implements a 1.64ms delay after Clear Display function or the 1 second delay for the LCD display refresh interval
+	 reg LCD_RS_on=1;				  //LCD_E_on=0 & LCD_RS_on=0 -> 1.64ms delay  // LCD_E_on=0 & LCD_RS_on=1 -> 1sec delay
+	
+	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_OUTPUT} ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
+	  
+
+
 
 	 always @(posedge next_command_signal, posedge reset)
 		if (reset)
@@ -50,7 +54,6 @@ module lcd_controller(
 			   refresh_counter=0;	
 				LCD_E_on=1;			
 				LCD_RS_on=0;			
-					
 			end
 		else	
 				begin
@@ -123,19 +126,16 @@ endmodule
 //58: -Blank-     00000000  Wait 1 second and repeat from 10th command
 
 
+///The following modulation and set of instructions is to be used for the initializaton of the LCD display and Operation mode necessary for the given project
 
 //Power-On Initialization
 //	The initialization sequence first establishes that the FPGA application wishes to use the 
 //	four-bit data interface to the LCD as follows:
-//		WAIT 750.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER
-//	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT 205.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  955.000
-//	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT   5.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  960.000
-//	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT   2.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  962.000
-//	//	DATA=0x02 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
-//		WAIT   2.000 CLOCKS,  EVERYTHING ZERO OR DOESNT MATTER  964.000
+//		WAIT 750.000 CLOCKS, DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
+//		WAIT 205.000 CLOCKS, DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
+//		WAIT   5.000 CLOCKS, DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
+//		WAIT   2.000 CLOCKS, DATA=0x02 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
+//		WAIT   2.000 CLOCKS, Before signalling the next instruction.
 //	 
 //Function Set
 //	Sets interface data length, number of display lines, and character font. 

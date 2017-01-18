@@ -85,6 +85,10 @@ module sync_10bit_interface(
 														waitingtime<=1;
 														next_command<=1;
 													end	
+													
+								//DATA_INITIALIZATION:					
+								
+								
 												else if(clock_counter+1==63 & waitingtime==0 & NextState!=DATA_INITIALIZATION) 
 													begin
 														NextState<= DATA_INITIALIZATION;	
@@ -102,33 +106,42 @@ module sync_10bit_interface(
 														reset_counter<=1;
 														waitingtime<=1;
 													end
-
-												else if(clock_counter+1>=750000 & clock_counter+1<=750000+12 & waitingtime==2)
-													begin 
-														LCD_E<=1;
+														MODULATED_DATA<=3;
+														
+														
+								//Power-On Initialization
+								//	The initialization sequence first establishes that the FPGA application wishes to use the 
+								//	four-bit data interface to the LCD as follows:												
+												else if(clock_counter+1>=750000 & clock_counter+1<=750000+12 & waitingtime==2) 
+													begin   						//		WAIT 750.000 CLOCKS
+														LCD_E<=1;				//	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
 														MODULATED_DATA<=3;
 													end
 												else if(clock_counter+1>=955012 & clock_counter+1<=955012+12 & waitingtime==2)
 													begin 
-														LCD_E<=1;
-														MODULATED_DATA<=3;
+														LCD_E<=1;				//		WAIT 205.000 CLOCKS,  
+														MODULATED_DATA<=3;   //	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
 													end												
 												else if(clock_counter+1>=960024 & clock_counter+1<=960024+12 & waitingtime==2)
 													begin 
-														LCD_E<=1;
-														MODULATED_DATA<=3;
+														LCD_E<=1;				//    WAIT   5.000 CLOCKS,
+														MODULATED_DATA<=3;	//	//	DATA=0x03 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
 													end												
 												else if(clock_counter+1>=962036 & clock_counter+1<=962036+12 & waitingtime==2)
 													begin 
-														LCD_E<=1;
-														MODULATED_DATA<=2;
+														LCD_E<=1;				//		WAIT   2.000 CLOCKS,
+														MODULATED_DATA<=2;   //	//	DATA=0x02 for 15clocks &  LCD_E=1; FOR 12CLOCKS THEN LOW
 													end																					
 												else if(clock_counter+1==964048 & waitingtime==2)
 													begin
-														NextState<= DATA_INITIALIZATION;
-														reset_counter<=1; 
+														reset_counter<=1; //		WAIT   2.000 CLOCKS, Before signalling the next instruction.
 														waitingtime<=1;
+														NextState<= DATA_INITIALIZATION;  
+
 													end
+//////////////////////////////////////////////////////////Power-On Initialization///////////////////////////////////////////////////////////													
+												
+								//default:				
 												else
 													begin
 														next_command<=0;
@@ -137,8 +150,11 @@ module sync_10bit_interface(
 														MODULATED_DATA<= 0;
 														reset_counter<=0;
 													end
-
 										end
+										
+										
+										
+								//Data supplied by the lcd_controller are signalled according the transmision protocol defined by the LCD manufacturer g		
 									DATA_INITIALIZATION:
 										begin
 												LCD_E<=0;
@@ -156,6 +172,9 @@ module sync_10bit_interface(
 																MODULATED_DATA<=UNMODULATED_DATA[7:4];
 														end
 										end
+										
+										
+										
 									ENABLE_MODULATION_START:
 										begin
 													LCD_RS<=UNMODULATED_DATA[9];
