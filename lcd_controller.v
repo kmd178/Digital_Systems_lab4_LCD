@@ -22,7 +22,7 @@ module lcd_controller(
 	 reg [5:0] command_counter=0;
 	 reg [1:0] refresh_counter=0;	  //For the implementation of the rotating cursor.Every refresh interval in the subdivision of 4 has a different 
 											//output signal transmitted to the 32nd character position of the LCD display. 
-	 
+	 wire next_command_signal;
 	 always @(posedge next_command_signal, posedge reset)
 		if (reset)
 			command_counter=0;
@@ -37,8 +37,8 @@ module lcd_controller(
 	 
 	 
 	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
-	 wire [7:0] BRAM_OUTPUT; // DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0	 
-
+	 //BRAM_OUTPUT: DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0	 
+	 
 
 	 reg LCD_E_on=1;				  //Configures the state that implements a 1.64ms delay after Clear Display function or the 1 second delay for the LCD display refresh interval
 	 reg LCD_RS_on=1;				  //LCD_E_on=0 & LCD_RS_on=0 -> 1.64ms delay  // LCD_E_on=0 & LCD_RS_on=1 -> 1sec delay

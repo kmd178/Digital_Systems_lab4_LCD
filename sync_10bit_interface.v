@@ -15,7 +15,7 @@ module sync_10bit_interface(
 					ENABLE_MODULATION_START	= 2'b10;
 				//	ENABLE_MODULATION_END	= 2'b11;
 		
-	always @(reset)
+	always @(posedge reset)
 		LCD_RW = 0;				
 	 //Display permanently accepts data in write mode. The LCD_RW signal can be tied Low permanently because the FPGA generally has no reason to read information from the display
 	reg [1:0] CurrentState;
@@ -106,9 +106,7 @@ module sync_10bit_interface(
 														reset_counter<=1;
 														waitingtime<=1;
 													end
-														MODULATED_DATA<=3;
-														
-														
+																																										//MODULATED_DATA<=3;
 								//Power-On Initialization
 								//	The initialization sequence first establishes that the FPGA application wishes to use the 
 								//	four-bit data interface to the LCD as follows:												
