@@ -1,0 +1,11 @@
+NET "LCD_E" LOC = M18;
+NET "LCD_RS" LOC = L18;
+NET "LCD_RW" LOC = L17;
+NET "SF_D_8" LOC = R15;
+NET "SF_D_9" LOC = R16;
+NET "SF_D_10" LOC = P17;
+NET "SF_D_11" LOC = M15;
+NET "clk" LOC = C9;
+NET "reset" LOC = K17;
+ 
+//INST "bram/RAMB16_S9_inst" LOC = RAMB16_X0Y9;

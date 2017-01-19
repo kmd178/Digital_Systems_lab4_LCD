@@ -40,16 +40,19 @@ module BRAM_instructions(
 //40-55: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
 //...
 //56-59: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
-//60: -Blank-     00000000  Wait 1 second and repeat from 21st command
+//60: -Blank-     00000000  Wait 1 second and repeat from 10th command
    RAMB16_S9 #(
       .INIT(9'h000),  // Value of output RAM registers at startup
       .SRVAL(9'h000), // Output value upon SSR assertion
       .WRITE_MODE("WRITE_FIRST"), // WRITE_FIRST, READ_FIRST or NO_CHANGE
 
+//      .INIT_00(256'h4A_49_48_47_46_45_44_43_42_41_80_01_01_01_01_01_59_1F_56_10_10_10_10_10_49_1F_41_00_01_0C_06_28),
+//      .INIT_01(256'hFF_FF_FF_FF_FF_00_03_02_01_00_6F_6E_6D_6C_6B_6A_69_68_67_66_65_64_63_62_61_C0_50_4F_4E_4D_4C_4B),
+//39_38_37_36_35_34_33_32_31
       // The forllowing INIT_xx declarations specify the initial contents of the RAM
       // Address 0 to 511
-      .INIT_00(256'h4A_49_48_47_46_45_44_43_42_41_80_01_01_01_01_01_59_1F_56_10_10_10_10_10_49_1F_41_00_01_0C_06_28),
-      .INIT_01(256'hFF_FF_FF_FF_FF_00_03_02_01_00_6F_6E_6D_6C_6B_6A_69_68_67_66_65_64_63_62_61_C0_50_4F_4E_4D_4C_4B),
+      .INIT_00(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_34_33_32_31_30_45_44_43_42_41_81_20_00_01_0C_06_28),
+      .INIT_01(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
       .INIT_02(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
       .INIT_03(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
       .INIT_04(256'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00),
