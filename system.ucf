@@ -1,16 +1,4 @@
 # provides the UCF constraints for the VGA display port of the SPARTAN3E board, including the I/O pin settings
-
-#PIN assignment,        |the I/Ostandard used|the output drive current| the output slew rate
-#NET VGA_RED LOC= H14    | IOSTANDARD = LVTTL | DRIVE = 8              | SLEW = FAST ;
-#NET VGA_GREEN LOC = H15 | IOSTANDARD = LVTTL | DRIVE = 8              | SLEW = FAST ;
-#NET VGA_BLUE  LOC = G15 | IOSTANDARD = LVTTL | DRIVE = 8              | SLEW = FAST ;
-#NET VGA_HSYNC LOC = F15 | IOSTANDARD = LVTTL | DRIVE = 8              | SLEW = FAST ;
-#NET VGA_VSYNC LOC = F14 | IOSTANDARD = LVTTL | DRIVE = 8              | SLEW = FAST ;
-#NET clk LOC = T9;
-#NET reset LOC = L14;
-
-
-
 NET "LCD_E" LOC = M18;
 NET "LCD_E" IOSTANDARD = LVCMOS33;
 NET "LCD_E" DRIVE = 4;
@@ -45,25 +33,6 @@ NET "clk" IOSTANDARD = LVCMOS33;
 NET "reset" LOC = K17;
 NET "reset" IOSTANDARD = LVTTL;
 NET "reset" PULLDOWN;
-
-
-
-#NET an3 LOC = E13;
-#NET an2 LOC = F14;
-#NET an1 LOC = G14;	
-#NET an0 LOC = D14;
-#NET BTN2 LOC = L13;
-#NET a LOC = E14;
-#NET b LOC = G13;
-#NET c LOC = N15;
-#NET d LOC = P15; 
-#NET e LOC = R16;
-#NET f LOC = F13;
-#NET g LOC = N16;
-#NET dp LOC = P16;
-
-#NET "clk" TNM_NET = "clk";
-#TIMESPEC "TS_clk" = PERIOD "clk" 20 ns HIGH 50 %;
 
 # PlanAhead Generated physical constraints 
 

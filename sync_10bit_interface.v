@@ -2,18 +2,17 @@
 module sync_10bit_interface(
 		input clk,
 		input reset,
-		input [10:0] UNMODULATED_DATA,
+		input [10:0] UNMODULATED_DATA, //LCD_E_on , LCD_RS_on, LCD_RW=1'b0 , BRAM_OUTPUT
 		output reg [3:0] MODULATED_DATA,
 		output reg LCD_RS,  
 		output reg LCD_RW,
 		output reg LCD_E,
-		output reg next_command
+		output reg next_command  //Posedge when next command transmition is available
 		);
 	
 	parameter	DATA_INACTIVE				= 2'b00,
 					DATA_INITIALIZATION 		= 2'b01,
 					ENABLE_MODULATION_START	= 2'b10;
-				//	ENABLE_MODULATION_END	= 2'b11;
 		
 	always @(posedge reset)
 		LCD_RW = 0;				
@@ -26,12 +25,13 @@ module sync_10bit_interface(
 	//1280ns=0;  		//64clk		 	//DATA_INACTIVE       (transmision of the next 4bits)
 	//40280ns=0;		//2014clk 		//DATA_INACTIVE       (transmision of the next command)
 	//15000000ns=0;	//750000clk 	//DATA_INACTIVE       (transmision of the next command)
+
 	reg [25:0] 	clock_counter=0;
 	reg reset_counter;
 	reg [1:0] waitingtime=2;	//0:Waiting time=1us  		(transmision of the next 4bits)
 										//1:Waiting time=40us 		(transmision of the next command)
-										//2:Waiting time=15000us 	(display activation time)
-					
+										//2:Waiting time=19.280us 	(display activation time) (also implements the signal modulation of the display initialization)
+										//3:Waiting time=1.64ms or 1s depending on the  LCD_RS input 	(Clear Dsiplay or Display refresh period)			
 
 ////////////////////////////////////////// FSM
 	always @(posedge clk, posedge reset)
@@ -67,18 +67,20 @@ module sync_10bit_interface(
 			else
 				begin
 								case (CurrentState)
-									DATA_INACTIVE:
+									DATA_INACTIVE:  //This is the state where data transmition remains inactive in the FPGAs interface
 										begin 
-												if(UNMODULATED_DATA[10]==0  & waitingtime!=3 & NextState!=DATA_INITIALIZATION)
+										
+								//Inactive Data periods: Clear display & Display Refresh waiting states
+												if(UNMODULATED_DATA[10]==0  & waitingtime!=3 & NextState!=DATA_INITIALIZATION)  //if LCD_E incoming signal is set to 0 then one of the following states is possible
 														waitingtime<=3;
-												else if(clock_counter+1==82000 & UNMODULATED_DATA[9]==0 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
+												else if(clock_counter+1==82000 & UNMODULATED_DATA[9]==0 & waitingtime==3 & NextState!=DATA_INITIALIZATION)    //Clear display period: 1.64ms (LCD_RS=0)
 													begin
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1; 
 														waitingtime<=1;
 														next_command<=1;
 													end	
-												else if(clock_counter+1==50000000 & UNMODULATED_DATA[9]==1 & waitingtime==3 & NextState!=DATA_INITIALIZATION)
+												else if(clock_counter+1==50000000 & UNMODULATED_DATA[9]==1 & waitingtime==3 & NextState!=DATA_INITIALIZATION)  //Refresh period: 1s 			(LCD_RS=1)
 													begin
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1; 
@@ -87,27 +89,27 @@ module sync_10bit_interface(
 													end	
 													
 								//DATA_INITIALIZATION:					
-								
-								
-												else if(clock_counter+1==63 & waitingtime==0 & NextState!=DATA_INITIALIZATION) 
+												else if(clock_counter+1==63 & waitingtime==0 & NextState!=DATA_INITIALIZATION)   //Second group of the 8bit communication through the 4bit bus
 													begin
 														NextState<= DATA_INITIALIZATION;	
 														reset_counter<=1; 
 														waitingtime<=0;
 													end
-												else if(clock_counter+1==2012 & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
+												else if(clock_counter+1==2012 & waitingtime==1 & NextState!=DATA_INITIALIZATION) //Memory preinitialization of the LCD_RS and SF_D[11:8] data from BRAM
 													begin 
 														next_command<=1;
 													end	
-												else if(clock_counter+1==2013 & waitingtime==1 & NextState!=DATA_INITIALIZATION) 
+												else if(clock_counter+1==2013 & waitingtime==1 & NextState!=DATA_INITIALIZATION) //First group of the 8bit communication through the 4bit bus
 													begin 
 														next_command<=0;
 														NextState<= DATA_INITIALIZATION;
 														reset_counter<=1;
 														waitingtime<=1;
 													end
-																																										//MODULATED_DATA<=3;
-								//Power-On Initialization
+										
+										
+																																//MODULATED_DATA<=3;
+								//Power-On Initialization: (accessed only when powering on the display)
 								//	The initialization sequence first establishes that the FPGA application wishes to use the 
 								//	four-bit data interface to the LCD as follows:												
 												else if(clock_counter+1>=750000 & clock_counter+1<=750000+12 & waitingtime==2) 
@@ -152,8 +154,10 @@ module sync_10bit_interface(
 										
 										
 										
-								//Data supplied by the lcd_controller are signalled according the transmision protocol defined by the LCD manufacturer g		
-									DATA_INITIALIZATION:
+////////////////////////////Data supplied by the lcd_controller are signalled according the transmision protocol defined by the LCD manufacturer through the waiting
+////////////////////////////times of the below states:
+								
+									DATA_INITIALIZATION: //initializing the LCD_RS, LCD_RW, and SF_D[11:8] signals at least 40 ns before the enable LCD_E goes High. 
 										begin
 												LCD_E<=0;
 												LCD_RS<=UNMODULATED_DATA[9];
@@ -173,7 +177,7 @@ module sync_10bit_interface(
 										
 										
 										
-									ENABLE_MODULATION_START:
+									ENABLE_MODULATION_START: // The LCD_E signal must remain High for 230 ns or longer. 
 										begin
 													LCD_RS<=UNMODULATED_DATA[9];
 													if(clock_counter+1==14) 
@@ -183,6 +187,8 @@ module sync_10bit_interface(
 													else
 															LCD_E<=1;
 										end
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+										
 									default:
 										begin  //reset state
 											next_command<=0;

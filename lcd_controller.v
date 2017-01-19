@@ -16,9 +16,9 @@ module lcd_controller(
     );
 					//first executed command
 	 
-	   
-	   
-	 	
+	 
+	 
+	 	 
 	 reg [5:0] command_counter=0;
 	 reg [1:0] refresh_counter=0;	  //For the implementation of the rotating cursor.Every refresh interval in the subdivision of 4 has a different 
 											//output signal transmitted to the 32nd character position of the LCD display. 
@@ -37,13 +37,13 @@ module lcd_controller(
 	 
 	 wire [7:0] BRAM_OUTPUT;
 	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
-	 wire [7:0] BRAM_input= BRAM_OUTPUT;  //DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0	 
+	 //BRAM_OUTPUT: DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0	 
 	 
 
 	 reg LCD_E_on=1;				  //Configures the state that implements a 1.64ms delay after Clear Display function or the 1 second delay for the LCD display refresh interval
 	 reg LCD_RS_on=1;				  //LCD_E_on=0 & LCD_RS_on=0 -> 1.64ms delay  // LCD_E_on=0 & LCD_RS_on=1 -> 1sec delay
 	
-	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_input} ,{SF_D_11,SF_D_10,SF_D_9,SF_D_8}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
+	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_OUTPUT} ,{SF_D_11,SF_D_10,SF_D_9,SF_D_8}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
 	  
 
 
@@ -61,20 +61,20 @@ module lcd_controller(
 						4: begin  //Clear Display function
 							LCD_E_on=0;   //large waiting time ->  1.64ms. sync_10bit_interface module is designed to implement the waiting time of the Clear Display function in its FSM
 							end
-						5: LCD_RS_on=1;
-//						7: LCD_RS_on=0;
-//						8: LCD_RS_on=1;
-//						13: LCD_RS_on=0;
-//						14: LCD_RS_on=1;
-//						15: LCD_RS_on=0;
-//						16: LCD_RS_on=1;
+						6: LCD_RS_on=1;
+						7: LCD_RS_on=0;
+						8: LCD_RS_on=1;
+						13: LCD_RS_on=0;
+						14: LCD_RS_on=1;
+						15: LCD_RS_on=0;
+						16: LCD_RS_on=1;
 						21: begin
-								LCD_RS_on=1;
+								LCD_RS_on=0;
 								LCD_E_on=1;
 							 end
-//						22: LCD_RS_on=1;
-//						38: LCD_RS_on=0;
-//						39: LCD_RS_on=1;
+						22: LCD_RS_on=1;
+						38: LCD_RS_on=0;
+						39: LCD_RS_on=1;
 						58: begin 
 								refresh_counter=refresh_counter+1;
 								LCD_RS_on=1; //invalid instruction input to sync_10bit_interface {signals the 1second interval of the LED's refresh}
@@ -123,7 +123,7 @@ endmodule
 //39-53: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
 //...
 //54-57: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
-//58: -Blank-     00000000  Wait 1 second and repeat from 10th command
+//58: -Blank-     00000000  Wait 1 second and repeat from 21st command
 
 
 ///The following modulation and set of instructions is to be used for the initializaton of the LCD display and Operation mode necessary for the given project
@@ -145,7 +145,7 @@ endmodule
 //Entry Mode Set 
 //	Sets the cursor move direction and specifies whether or not to shift the display. 
 //	These operations are performed during data reads and writes.
-//	Execution Time: 40탎  	//00000001--  -> 0000000110   //0x06 prosdiorizonas oti o elekths afksanei aftomata thn diefthinsh
+//	Execution Time: 40탎  	//00000001--  -> 0000000110   //0x06 
 //		Bit DB1: (I/D) Increment/Decrement
 //			0 Auto-decrement address counter. Cursor/blink moves to left.
 //			1 Auto-increment address counter. Cursor/blink moves to right.
@@ -161,7 +161,7 @@ endmodule
 //Display On/Off
 //	Display is turned on or off, controlling all characters, cursor and cursor position character 
 //	(underscore) blink.
-//	Execution Time: 40탎 	//0000001---  -> 0000001100  //0x0C energopoiontas thn endiksh kai svinontas ton aftomato dromea
+//	Execution Time: 40탎 	//0000001---  -> 0000001100  //0x0C 
 //		Bit DB2: (D) Display On/Off
 //			0No characters displayed. However, data stored in DD RAM is retained
 //			1Display characters stored in DD RAM	
