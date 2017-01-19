@@ -123,7 +123,7 @@ endmodule
 //39-53: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
 //...
 //54-57: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
-//58: -Blank-     00000000  Wait 1 second and repeat from 10th command
+//58: -Blank-     00000000  Wait 1 second and repeat from 21st command
 
 
 ///The following modulation and set of instructions is to be used for the initializaton of the LCD display and Operation mode necessary for the given project

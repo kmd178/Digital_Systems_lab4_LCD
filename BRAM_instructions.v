@@ -40,7 +40,7 @@ module BRAM_instructions(
 //40-55: WRITE CHAR ON THE SPECIFIED ADRESS (+ITERATION)    rs=1 0x61 until 0x6F
 //...
 //56-59: WRITE CHAR  (rotationally every 1 second loop)   rs=1 0x00 or 0x01 or 0x02 or 0x03 
-//60: -Blank-     00000000  Wait 1 second and repeat from 10th command
+//60: -Blank-     00000000  Wait 1 second and repeat from 21st command
    RAMB16_S9 #(
       .INIT(9'h000),  // Value of output RAM registers at startup
       .SRVAL(9'h000), // Output value upon SSR assertion
