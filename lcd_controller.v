@@ -43,7 +43,7 @@ module lcd_controller(
 	 reg LCD_E_on=1;				  //Configures the state that implements a 1.64ms delay after Clear Display function or the 1 second delay for the LCD display refresh interval
 	 reg LCD_RS_on=1;				  //LCD_E_on=0 & LCD_RS_on=0 -> 1.64ms delay  // LCD_E_on=0 & LCD_RS_on=1 -> 1sec delay
 	
-	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_OUTPUT} ,{SF_D_8,SF_D_9,SF_D_10,SF_D_11}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
+	 sync_10bit_interface kmd(clk, reset, {LCD_E_on , LCD_RS_on, 1'b0 , BRAM_OUTPUT} ,{SF_D_11,SF_D_10,SF_D_9,SF_D_8}, LCD_RS, LCD_RW, LCD_E, next_command_signal);
 	  
 
 
@@ -145,7 +145,7 @@ endmodule
 //Entry Mode Set 
 //	Sets the cursor move direction and specifies whether or not to shift the display. 
 //	These operations are performed during data reads and writes.
-//	Execution Time: 40탎  	//00000001--  -> 0000000110   //0x06 prosdiorizonas oti o elekths afksanei aftomata thn diefthinsh
+//	Execution Time: 40탎  	//00000001--  -> 0000000110   //0x06 
 //		Bit DB1: (I/D) Increment/Decrement
 //			0 Auto-decrement address counter. Cursor/blink moves to left.
 //			1 Auto-increment address counter. Cursor/blink moves to right.
@@ -161,7 +161,7 @@ endmodule
 //Display On/Off
 //	Display is turned on or off, controlling all characters, cursor and cursor position character 
 //	(underscore) blink.
-//	Execution Time: 40탎 	//0000001---  -> 0000001100  //0x0C energopoiontas thn endiksh kai svinontas ton aftomato dromea
+//	Execution Time: 40탎 	//0000001---  -> 0000001100  //0x0C 
 //		Bit DB2: (D) Display On/Off
 //			0No characters displayed. However, data stored in DD RAM is retained
 //			1Display characters stored in DD RAM	
