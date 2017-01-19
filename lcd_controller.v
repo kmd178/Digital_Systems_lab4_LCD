@@ -18,7 +18,7 @@ module lcd_controller(
 	 
 	 
 	 
-	 	
+	 	 
 	 reg [5:0] command_counter=0;
 	 reg [1:0] refresh_counter=0;	  //For the implementation of the rotating cursor.Every refresh interval in the subdivision of 4 has a different 
 											//output signal transmitted to the 32nd character position of the LCD display. 
@@ -35,7 +35,7 @@ module lcd_controller(
 		else
 			command_counter=command_counter+1;
 	 
-	 
+	 wire [7:0] BRAM_OUTPUT;
 	 BRAM_instructions bram(clk, {5'b00000,command_counter} , 1'b1 , BRAM_OUTPUT); //BRAM instances:  Utilizing the bulk memory necessary for storing the commands.
 	 //BRAM_OUTPUT: DB7 , DB6 , DB5 , DB4 , DB3 , DB2 , DB1 , DB0	 
 	 
