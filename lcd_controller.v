@@ -26,12 +26,12 @@ module lcd_controller(
 	 always @(posedge next_command_signal, posedge reset)
 		if (reset)
 			command_counter=0;
-		else if(command_counter==11)
+		else if(command_counter==53)
 			command_counter=command_counter+1+refresh_counter;
-		else if(command_counter==12 | command_counter==13 | command_counter==14)
-			command_counter=16;
-		else if(command_counter==16)
-			command_counter=6; //last command-1
+		else if(command_counter==54 | command_counter==55 | command_counter==56)
+			command_counter=58;
+		else if(command_counter==58)
+			command_counter=21; //last command-1
 		else
 			command_counter=command_counter+1;
 	 
@@ -61,21 +61,21 @@ module lcd_controller(
 						4: begin  //Clear Display function
 							LCD_E_on=0;   //large waiting time ->  1.64ms. sync_10bit_interface module is designed to implement the waiting time of the Clear Display function in its FSM
 							end
-						5: begin 
-							LCD_E_on=1;
-							LCD_RS_on=1;
-							end
-						6: LCD_RS_on=0;
-						7: LCD_RS_on=1;
+						5: LCD_RS_on=1;
+//						7: LCD_RS_on=0;
 //						8: LCD_RS_on=1;
 //						13: LCD_RS_on=0;
 //						14: LCD_RS_on=1;
 //						15: LCD_RS_on=0;
 //						16: LCD_RS_on=1;
+						21: begin
+								LCD_RS_on=1;
+								LCD_E_on=1;
+							 end
 //						22: LCD_RS_on=1;
 //						38: LCD_RS_on=0;
-//						39: LCD_RS_on=1; 
-						16: begin 
+//						39: LCD_RS_on=1;
+						58: begin 
 								refresh_counter=refresh_counter+1;
 								LCD_RS_on=1; //invalid instruction input to sync_10bit_interface {signals the 1second interval of the LED's refresh}
 								LCD_E_on=0;  //invalid instruction input to sync_10bit_interface {signals the 1second interval of the LED's refresh}
